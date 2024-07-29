@@ -6,7 +6,7 @@ from langfuse.decorators import observe, langfuse_context
 import litellm
 from litellm import completion
 
-from tools import get_current_weather, calculate
+from tools import get_current_weather, calculate, send_code, format_units
 
 load_dotenv()
 
@@ -58,7 +58,7 @@ def main():
   for model in models:
     trace_id = langfuse_context.get_current_trace_id()
     try:
-      response = generation(trace_id=trace_id, model=model, messages=messages, tools=tools)
+      response = generation(trace_id=trace_id, model=model, messages=messages, tools=tools, tool_choice="auto")
       message = response.choices[0].message.content
       print(f"{model}> {message}")
     except Exception as e:
@@ -96,7 +96,9 @@ def handle_tool_calls(response_message):
 
   available_functions = {
       "get_current_weather": get_current_weather.get_current_weather,
-      "calculate": calculate.calculate
+      "calculate": calculate.calculate,
+      "send_code": send_code.send_code,
+      "format_units": format_units.format_units,
   }
 
   for tool_call in tool_calls:
